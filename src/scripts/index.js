@@ -1,12 +1,12 @@
 import "../pages/index.css";
+import { initialCards } from "./cards.js";
 import {
-  initialCards,
   addCard,
   addCardtoStart,
   deleteCard,
   likeCard,
-} from "./cards.js";
-import { openModal, closeModal } from "./modal.js";
+} from "./card.js";
+import { openModal, closeModal, closeOnOverlayClick } from "./modal.js";
 
 const placesList = document.querySelector(".places__list");
 export const cardTemplate = document.querySelector("#card-template").content;
@@ -29,10 +29,10 @@ const popupCloseButtonsArr = [
   closeButtonImage,
 ];
 
-let profileTitle = document.querySelector(".profile__title");
-let profileDescription = document.querySelector(".profile__description");
-let nameInput = popupEdit.querySelector('input[name="name"]');
-let jobInput = popupEdit.querySelector('input[name="description"]');
+const profileTitle = document.querySelector(".profile__title");
+const profileDescription = document.querySelector(".profile__description");
+const nameInput = popupEdit.querySelector('input[name="name"]');
+const jobInput = popupEdit.querySelector('input[name="description"]');
 const newPlaceForm = popupAdd.querySelector('form[name="new-place"]');
 const placeInput = popupAdd.querySelector('input[name="place-name"]');
 const imageLinkInuput = popupAdd.querySelector('input[name="link"]');
@@ -41,8 +41,8 @@ function zoomImage(event) {
   const srcData = event.target.src;
   const altData = event.target.alt;
   openModal(popupImage);
-  let image = popupImage.querySelector(".popup__image");
-  let imageName = popupImage.querySelector(".popup__caption");
+  const image = popupImage.querySelector(".popup__image");
+  const imageName = popupImage.querySelector(".popup__caption");
   imageName.textContent = altData;
   image.src = srcData;
   image.alt = altData;
@@ -69,21 +69,15 @@ popupCloseButtonsArr.forEach(function (item) {
   });
 });
 
-//закрытие попапа по Esc
-document.addEventListener("keydown", function (evt) {
-  const currentPopup = document.querySelector(".popup_is-opened");
-  if (evt.key === "Escape" && currentPopup) {
-    closeModal(currentPopup);
-  }
-});
+// //закрытие попапа по Esc
+// document.addEventListener("keydown", function (evt) {
+//   const currentPopup = document.querySelector(".popup_is-opened");
+//   if (evt.key === "Escape" && currentPopup) {
+//     closeModal(currentPopup);
+//   }
+// });
 
-//Функция закрытия попапа по клику за пределами
-function closeOnOverlayClick({ currentTarget, target }) {
-  const isClickedOnOverlay = target === currentTarget;
-  if (isClickedOnOverlay) {
-    closeModal(currentTarget);
-  }
-}
+
 
 //цикл навешивания слушателя на все попапы
 popupWindowsArr.forEach(function (item) {
