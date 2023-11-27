@@ -12,7 +12,7 @@ function closeModal(popup) {
   popup.removeEventListener("click", closePopupByEsc);
 }
 
-
+//Функция закрытия попапа по ESC
 function closePopupByEsc(evt) {
   if (evt.key === "Escape") { 
     const currentPopup = document.querySelector(".popup_is-opened");
