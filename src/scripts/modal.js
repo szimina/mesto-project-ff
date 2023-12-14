@@ -1,31 +1,37 @@
-//функция добавления класса видимости с попап
-function openModal(popup) {
-  popup.classList.add("popup_is-opened");
-  popup.classList.add("popup_is-animated");
-  popup.addEventListener('click', closePopupByEsc)
+import { clearValidation } from "./validation.js";
+import { validationConfig, inputPopupsArr} from "./index.js"
+
+//функция добавления класса видимости с попап и валидации
+export function openModal(currentPopup) {
+  currentPopup.classList.add("popup_is-opened");
+  currentPopup.classList.add("popup_is-animated");
+  document.addEventListener("keydown", closePopupByEsc);
 }
 
-//функция удаления класса видимости с попап
-function closeModal(popup) {
-  popup.classList.remove("popup_is-opened");
-  popup.classList.remove("popup_is-animated");
-  popup.removeEventListener("click", closePopupByEsc);
-}
-
-//Функция закрытия попапа по ESC
-function closePopupByEsc(evt) {
-  if (evt.key === "Escape") { 
-    const currentPopup = document.querySelector(".popup_is-opened");
-    closeModal(currentPopup); 
-
+//функция закрытия попапа, очистка формы и очистка валидации 
+export function closeModal(currentPopup) {
+  currentPopup.classList.remove("popup_is-opened");
+  currentPopup.classList.remove("popup_is-animated");
+  document.removeEventListener("keydown", closePopupByEsc);
+  if (inputPopupsArr.includes(currentPopup)) {
+    currentPopup.querySelector('form').reset()
+    clearValidation(currentPopup, validationConfig)
   }
 }
 
+//Функция закрытия попапа по ESC
+export function closePopupByEsc(evt) {
+  if (evt.key === "Escape") {
+    const currentPopup = document.querySelector(".popup_is-opened");
+    closeModal(currentPopup);
+   }
+}
+
 //Функция закрытия попапа по клику за пределами
-function closeOnOverlayClick({ currentTarget, target }) {
+export function closeOnOverlayClick({ currentTarget, target }) {
   const isClickedOnOverlay = target === currentTarget;
   if (isClickedOnOverlay) {
     closeModal(currentTarget);
   }
 }
-export { openModal, closeModal, closeOnOverlayClick };
+

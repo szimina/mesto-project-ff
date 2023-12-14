@@ -1,43 +1,97 @@
 import "../pages/index.css";
-import { initialCards } from "./cards.js";
-import {
-  addCard,
-  addCardtoStart,
-  deleteCard,
-  likeCard,
-} from "./card.js";
+import { addCard, addCardtoStart, deleteCard, likeCard } from "./card.js";
 import { openModal, closeModal, closeOnOverlayClick } from "./modal.js";
+import { enableValidation, clearValidation } from "./validation.js";
+import {
+  getCards,
+  getMyUserData,
+  amendUserData,
+  addNewImageToServer,
+  changeAvatar,
+} from "./api.js";
 
-const placesList = document.querySelector(".places__list");
+export const placesList = document.querySelector(".places__list");
 export const cardTemplate = document.querySelector("#card-template").content;
 
-const popupEdit = document.querySelector(".popup_type_edit");
-const popupAdd = document.querySelector(".popup_type_new-card");
+export const popupEdit = document.querySelector(".popup_type_edit");
+export const popupAdd = document.querySelector(".popup_type_new-card");
 const popupImage = document.querySelector(".popup_type_image");
+export const popupEditAvatar = document.querySelector(".popup_type_new-avatar");
+export const popupDeleteImageConfirmation = document.querySelector(
+  ".popup_type_delete-confirmation"
+);
 
 const buttonEdit = document.querySelector(".profile__edit-button");
 const buttonAdd = document.querySelector(".profile__add-button");
+const buttonEditAvatar = document.querySelector(".profile__image__edit");
 
-const closeButtonEdit = popupEdit.querySelector(".popup__close");
+export const closeButtonEdit = popupEdit.querySelector(".popup__close");
 const closeButtonAdd = popupAdd.querySelector(".popup__close");
 const closeButtonImage = popupImage.querySelector(".popup__close");
+const closeButtonEditAvatar = popupEditAvatar.querySelector(".popup__close");
+const closeButtonDeleteImage =
+  popupDeleteImageConfirmation.querySelector(".popup__close");
+export const saveButtonEdit = popupEdit.querySelector(".popup__button");
+export const saveButtonAdd = popupAdd.querySelector(".popup__button");
+export const saveButtonAvatarEdit =
+  popupEditAvatar.querySelector(".popup__button");
+export const confirmDeleteImageButton =
+  popupDeleteImageConfirmation.querySelector(".popup__button");
 
-const popupWindowsArr = [popupEdit, popupAdd, popupImage];
+const popupWindowsArr = [
+  popupEdit,
+  popupAdd,
+  popupImage,
+  popupEditAvatar,
+  popupDeleteImageConfirmation,
+];
+export const inputPopupsArr = [popupEdit, popupAdd, popupEditAvatar];
 const popupCloseButtonsArr = [
   closeButtonEdit,
   closeButtonAdd,
   closeButtonImage,
+  closeButtonEditAvatar,
+  closeButtonDeleteImage,
 ];
 
-const profileTitle = document.querySelector(".profile__title");
-const profileDescription = document.querySelector(".profile__description");
-const nameInput = popupEdit.querySelector('input[name="name"]');
-const jobInput = popupEdit.querySelector('input[name="description"]');
-const newPlaceForm = popupAdd.querySelector('form[name="new-place"]');
-const placeInput = popupAdd.querySelector('input[name="place-name"]');
-const imageLinkInuput = popupAdd.querySelector('input[name="link"]');
+let profileTitle = document.querySelector(".profile__title");
+let profileDescription = document.querySelector(".profile__description");
+let profileImage = document.querySelector(".profile__image");
+export const nameInput = popupEdit.querySelector('input[name="name"]');
+export const jobInput = popupEdit.querySelector('input[name="description"]');
+export const newPlaceForm = popupAdd.querySelector('form[name="new-place"]');
+export const placeInput = popupAdd.querySelector('input[name="place-name"]');
+export const imageLinkInuput = popupAdd.querySelector('input[name="link"]');
+const newAvatarForm = popupEditAvatar.querySelector('form[name="new-avatar"]');
+export const avatarLinkInput =
+  popupEditAvatar.querySelector('input[name="link"]');
 
-function zoomImage(event) {
+export const validationConfig = {
+  formSelector: ".popup_is-opened",
+  inputSelector: ".popup__input",
+  submitButtonSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_disabled",
+  inputErrorClass: "popup__input_type_error",
+  errorClass: "popup__error_visible",
+};
+
+//выгружает карточки и профиль пользователя
+Promise.all([getCards(), getMyUserData()])
+  .then(([responseCards, responceMyUserId]) => {
+    const myUserId = responceMyUserId._id;
+    profileTitle.textContent = responceMyUserId.name;
+    profileDescription.textContent = responceMyUserId.about;
+    profileImage.style = `background-image: url("${responceMyUserId.avatar}")`;
+
+    responseCards.forEach((item) => {
+      addCard(item, deleteCard, likeCard, zoomImage, placesList, myUserId);
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
+export function zoomImage(event) {
   const srcData = event.target.src;
   const altData = event.target.alt;
   openModal(popupImage);
@@ -48,19 +102,116 @@ function zoomImage(event) {
   image.alt = altData;
 }
 
-initialCards.forEach(function (item) {
-  addCard(item, deleteCard, likeCard, zoomImage, placesList);
-});
-
+//редактирование данных профиля
 buttonEdit.addEventListener("click", function () {
-  openModal(popupEdit);
   nameInput.value = profileTitle.textContent;
   jobInput.value = profileDescription.textContent;
+  openModal(popupEdit);
+  enableValidation(popupEdit, validationConfig);
 });
 
+function whileLoadingUserData(isLoading) {
+  if (isLoading) {
+    saveButtonEdit.textContent = "Сохранение...";
+  } else {
+    saveButtonEdit.textContent = "Сохранить";
+    closeModal(popupEdit);
+    clearValidation(popupEdit, validationConfig);
+  }
+}
+
+function handleFormSubmitEdit(evt) {
+  evt.preventDefault();
+  whileLoadingUserData(true);
+  amendUserData()
+    .then((result) => {
+      profileTitle.textContent = result.name;
+      profileDescription.textContent = result.about;
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+
+    .finally(() => {
+      whileLoadingUserData(false);
+    });
+}
+popupEdit.addEventListener("submit", handleFormSubmitEdit);
+
+//редактирование аватара
+buttonEditAvatar.addEventListener("click", function () {
+  openModal(popupEditAvatar); //
+  enableValidation(popupEditAvatar, validationConfig);
+});
+
+function whileLoadingAvatar(isLoading) {
+  if (isLoading) {
+    saveButtonAvatarEdit.textContent = "Сохранение...";
+  } else {
+    saveButtonAvatarEdit.textContent = "Сохранить";
+    closeModal(popupEditAvatar);
+    newAvatarForm.reset();
+    clearValidation(popupEditAvatar, validationConfig);
+  }
+}
+
+function handleFormAvatarEdit(evt) {
+  evt.preventDefault();
+  whileLoadingAvatar(true);
+  changeAvatar()
+    .then(
+      (result) =>
+        (profileImage.style = `background-image: url("${result.avatar}")`)
+    )
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(() => {
+      whileLoadingAvatar(false);
+    });
+}
+popupEditAvatar.addEventListener("submit", handleFormAvatarEdit);
+
+//добавление изображения
 buttonAdd.addEventListener("click", function () {
   openModal(popupAdd);
+  enableValidation(popupAdd, validationConfig);
 });
+
+function whileLoadingImage(isLoading) {
+  if (isLoading) {
+    saveButtonAdd.textContent = "Сохранение...";
+  } else {
+    saveButtonAdd.textContent = "Сохранить";
+    closeModal(popupAdd);
+    newPlaceForm.reset();
+    clearValidation(popupAdd, validationConfig);
+  }
+}
+
+function handleFormSubmitAdd(evt) {
+  evt.preventDefault();
+  whileLoadingImage(true);
+  addNewImageToServer()
+    .then((result) => {
+      const userId = result.owner._id;
+      addCardtoStart(
+        result,
+        deleteCard,
+        likeCard,
+        zoomImage,
+        placesList,
+        userId
+      );
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(() => {
+      whileLoadingImage(false);
+    });
+}
+popupAdd.addEventListener("submit", handleFormSubmitAdd);
 
 //цикл навешивания слушателя на все кнопки закрытия
 popupCloseButtonsArr.forEach(function (item) {
@@ -69,43 +220,7 @@ popupCloseButtonsArr.forEach(function (item) {
   });
 });
 
-// //закрытие попапа по Esc
-// document.addEventListener("keydown", function (evt) {
-//   const currentPopup = document.querySelector(".popup_is-opened");
-//   if (evt.key === "Escape" && currentPopup) {
-//     closeModal(currentPopup);
-//   }
-// });
-
-
-
 //цикл навешивания слушателя на все попапы
 popupWindowsArr.forEach(function (item) {
   item.addEventListener("click", closeOnOverlayClick);
 });
-
-// Обработчик «отправки» формы автора
-function handleFormSubmitEdit(evt) {
-  evt.preventDefault();
-  profileTitle.textContent = nameInput.value;
-  profileDescription.textContent = jobInput.value;
-  closeModal(popupEdit);
-}
-popupEdit.addEventListener("submit", handleFormSubmitEdit);
-
-// Обработчик «отправки» формы Новое место
-function handleFormSubmitAdd(evt) {
-  evt.preventDefault();
-  const placeName = placeInput.value;
-  const placeLink = imageLinkInuput.value;
-  addCardtoStart(
-    { name: placeName, link: placeLink },
-    deleteCard,
-    likeCard,
-    zoomImage,
-    placesList
-  );
-  closeModal(popupAdd);
-  newPlaceForm.reset();
-}
-popupAdd.addEventListener("submit", handleFormSubmitAdd);
