@@ -131,6 +131,7 @@ function handleFormSubmitEdit(evt) {
     .then((result) => {
       profileTitle.textContent = result.name;
       profileDescription.textContent = result.about;
+      closeModal(popupEditProfile);
     })
     .catch((err) => {
       console.log(err);
@@ -138,8 +139,6 @@ function handleFormSubmitEdit(evt) {
 
     .finally(() => {
       whileLoading(false, saveButtonEdit);
-      clearValidation(popupEditProfile, validationConfig);
-      closeModal(popupEditProfile);
     });
 }
 popupEditProfile.addEventListener("submit", handleFormSubmitEdit);
@@ -156,17 +155,15 @@ function handleFormAvatarEdit(evt) {
   whileLoading(true, saveButtonAvatarEdit);
   changeAvatar(avatarLinkInput.value)
     .then(
-      (result) =>
-        (profileImage.style = `background-image: url("${result.avatar}")`)
+      (result) => {
+        profileImage.style = `background-image: url("${result.avatar}")`
+        closeModal(popupEditAvatar)}
     )
     .catch((err) => {
       console.log(err);
     })
     .finally(() => {
       whileLoading(false, saveButtonAvatarEdit);
-      clearValidation(popupEditAvatar, validationConfig);
-      closeModal(popupEditAvatar);
-      newAvatarForm.reset();
     });
 }
 popupEditAvatar.addEventListener("submit", handleFormAvatarEdit);
@@ -192,15 +189,14 @@ function handleFormSubmitAdd(evt) {
         placesList,
         userId
       );
+      closeModal(popupAddCard);
+
     })
     .catch((err) => {
       console.log(err);
     })
     .finally(() => {
       whileLoading(false, saveButtonAdd);
-      clearValidation(popupAddCard, validationConfig);
-      closeModal(popupAddCard);
-      newPlaceForm.reset();
     });
 }
 popupAddCard.addEventListener("submit", handleFormSubmitAdd);
