@@ -32,7 +32,18 @@ function hasInvalidInput(inputList) {
   });
 }
 
-//активирует и дезактивирует кнопку при невалидном инпуте
+//активация и дезактивиация кнопки инпута
+
+function enableSubmitButton(button, classname) {
+  button.disabled = false;
+  button.classList.remove(classname);
+}
+
+function disableSubmitButton(button, classname) {
+  button.disabled = true;
+  button.classList.add(classname);
+}
+
 function toggleButton(
   popupWindow,
   submitButtonSelector,
@@ -44,11 +55,9 @@ function toggleButton(
     popupWindow.querySelectorAll(inputSelector)
   );
   if (hasInvalidInput(popupInputList)) {
-    buttonElement.disabled = true;
-    buttonElement.classList.add(inactiveButtonClass);
+    disableSubmitButton(buttonElement, inactiveButtonClass);
   } else {
-    buttonElement.disabled = false;
-    buttonElement.classList.remove(inactiveButtonClass);
+    enableSubmitButton(buttonElement, inactiveButtonClass);
   }
 }
 
@@ -91,8 +100,7 @@ export function clearValidation(popupWindow, validationConfig) {
     inputElement.setCustomValidity("");
   });
 
-  buttonElement.disabled = false;
-  buttonElement.classList.remove(validationConfig.inactiveButtonClass);
+  disableSubmitButton(buttonElement, validationConfig.inactiveButtonClass);
 }
 
 export function enableValidation(popupWindow, validationConfig) {

@@ -1,11 +1,3 @@
-import {
-  nameInput,
-  jobInput,
-  placeInput,
-  imageLinkInuput,
-  avatarLinkInput,
-} from "./index.js";
-
 const config = {
   baseUrl: "https://nomoreparties.co/v1/wff-cohort-2",
   headers: {
@@ -14,115 +6,76 @@ const config = {
   },
 };
 
+//Функция проверки статуса и возвращения ответа
+function checkResponseStatus(response) {
+  if (response.ok) {
+    return response.json();
+  } else {
+    return Promise.reject(`Ошибка: ${response.status}`);
+  }
+}
+
 export function getCards() {
   return fetch(`${config.baseUrl}/cards`, {
     headers: config.headers,
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      return Promise.reject(`Ошибка: ${response.status}`);
-    }
-  });
+  }).then((response) => checkResponseStatus(response));
 }
 
 export function getMyUserData() {
   return fetch(`${config.baseUrl}/users/me`, {
     headers: config.headers,
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      return Promise.reject(`Ошибка: ${response.status}`);
-    }
-  });
+  }).then((response) => checkResponseStatus(response));
 }
 
-export function amendUserData() {
+export function amendUserData(name, about) {
   return fetch(`${config.baseUrl}/users/me`, {
     method: "PATCH",
     headers: config.headers,
     body: JSON.stringify({
-      name: nameInput.value,
-      about: jobInput.value,
+      name: name,
+      about: about,
     }),
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      return Promise.reject(`Ошибка: ${response.status}`);
-    }
-  });
+  }).then((response) => checkResponseStatus(response));
 }
 
-export function addNewImageToServer() {
+export function addNewImageToServer(place, link) {
   return fetch(`${config.baseUrl}/cards`, {
     method: "POST",
     headers: config.headers,
     body: JSON.stringify({
-      name: placeInput.value,
-      link: imageLinkInuput.value,
+      name: place,
+      link: link,
     }),
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      return Promise.reject(`Ошибка: ${response.status}`);
-    }
-  });
+  }).then((response) => checkResponseStatus(response));
 }
 
-export function changeAvatar() {
+export function changeAvatar(link) {
   return fetch(`${config.baseUrl}/users/me/avatar`, {
     method: "PATCH",
     headers: config.headers,
     body: JSON.stringify({
-      avatar: avatarLinkInput.value,
+      avatar: link,
     }),
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      return Promise.reject(`Ошибка: ${response.status}`);
-    }
-  });
+  }).then((response) => checkResponseStatus(response));
 }
 
 export function deleteCardFromServer(id) {
   return fetch(`${config.baseUrl}/cards/${id}`, {
     method: "DELETE",
     headers: config.headers,
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      return Promise.reject(`Ошибка: ${response.status}`);
-    }
-  });
+  }).then((response) => checkResponseStatus(response));
 }
 
 export function likeCardOnServer(id) {
   return fetch(`${config.baseUrl}/cards/likes/${id}`, {
     method: "PUT",
     headers: config.headers,
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      return Promise.reject(`Ошибка: ${response.status}`);
-    }
-  });
+  }).then((response) => checkResponseStatus(response));
 }
 
 export function dislikeCardOnServer(id) {
   return fetch(`${config.baseUrl}/cards/likes/${id}`, {
     method: "DELETE",
     headers: config.headers,
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      return Promise.reject(`Ошибка: ${response.status}`);
-    }
-  });
+  }).then((response) => checkResponseStatus(response));
 }

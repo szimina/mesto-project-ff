@@ -10,7 +10,7 @@ import {
 } from "./api.js";
 import { openModal, closeModal } from "./modal.js";
 
-export function createCard(cardItem, onDelete, onLike, onZoom, userId) {
+function createCard(cardItem, onDelete, onLike, onZoom, userId) {
   const card = cardTemplate.querySelector(".card").cloneNode(true);
   const cardName = card.querySelector(".card__title");
   const cardImage = card.querySelector(".card__image");
@@ -68,7 +68,7 @@ function confirmDeleteImageButtonClickHandler(event) {
 
 export function deleteCard(event) {
   const cardToRemove = event.target.closest(".places__item");
-  let imageIdToRemove = cardToRemove.querySelector(".card__image").id;
+  const imageIdToRemove = cardToRemove.querySelector(".card__image").id;
   openModal(popupDeleteImageConfirmation);
   popupDeleteImageConfirmation.id = imageIdToRemove;
   confirmDeleteImageButton.addEventListener(
@@ -86,8 +86,9 @@ export function likeCard(event) {
     if (event.target.classList.contains("card__like-button_is-active")) {
       likeCardOnServer(imageId)
         .then((data) => {
-          let myImage = document.getElementById(imageId);
-          let likes = myImage.parentElement.querySelector(".card__like-count");
+          const myImage = document.getElementById(imageId);
+          const likes =
+            myImage.parentElement.querySelector(".card__like-count");
           likes.textContent = data.likes.length;
         })
         .catch((err) => {
@@ -96,8 +97,9 @@ export function likeCard(event) {
     } else {
       dislikeCardOnServer(imageId)
         .then((data) => {
-          let myImage = document.getElementById(imageId);
-          let likes = myImage.parentElement.querySelector(".card__like-count");
+          const myImage = document.getElementById(imageId);
+          const likes =
+            myImage.parentElement.querySelector(".card__like-count");
           likes.textContent = data.likes.length;
         })
         .catch((err) => {

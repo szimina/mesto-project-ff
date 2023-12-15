@@ -1,6 +1,3 @@
-import { clearValidation } from "./validation.js";
-import { validationConfig, inputPopupsArr} from "./index.js"
-
 //функция добавления класса видимости с попап и валидации
 export function openModal(currentPopup) {
   currentPopup.classList.add("popup_is-opened");
@@ -8,23 +5,19 @@ export function openModal(currentPopup) {
   document.addEventListener("keydown", closePopupByEsc);
 }
 
-//функция закрытия попапа, очистка формы и очистка валидации 
+//функция закрытия попапа, очистка формы и очистка валидации
 export function closeModal(currentPopup) {
   currentPopup.classList.remove("popup_is-opened");
   currentPopup.classList.remove("popup_is-animated");
   document.removeEventListener("keydown", closePopupByEsc);
-  if (inputPopupsArr.includes(currentPopup)) {
-    currentPopup.querySelector('form').reset()
-    clearValidation(currentPopup, validationConfig)
-  }
 }
 
 //Функция закрытия попапа по ESC
-export function closePopupByEsc(evt) {
+function closePopupByEsc(evt) {
   if (evt.key === "Escape") {
     const currentPopup = document.querySelector(".popup_is-opened");
     closeModal(currentPopup);
-   }
+  }
 }
 
 //Функция закрытия попапа по клику за пределами
@@ -34,4 +27,3 @@ export function closeOnOverlayClick({ currentTarget, target }) {
     closeModal(currentTarget);
   }
 }
-
